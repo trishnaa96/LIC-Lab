@@ -60,6 +60,23 @@ Common Source configuration. Thus, the operating point analysis ensures
 correct biasing of the transistor before performing transient and AC
 analyses.
 
+### Transistor Width Adjustment
+
+To achieve the required drain current (Id), the width (W) of the NMOS
+transistor was modified during the design process.
+
+Initially:
+W = 1.833 µm  
+
+After tuning to meet the desired Id:
+W = 2.7528 µm  
+
+By increasing the transistor width, the effective channel area
+increased, which in turn increased the drain current according to
+the MOSFET current equation. This adjustment ensured that the
+target operating point and power constraints were satisfied while
+maintaining proper saturation region operation.
+
 
 
 
