@@ -1417,7 +1417,7 @@ VDS = **0.7 V**
 
 ---
 
-#### Step 5: Saturation Check
+####  Saturation Check
 
 Condition:
 
@@ -1577,6 +1577,236 @@ W ≈ **101.5 μm**
 - Stable current operation  
 - Desired amplifier performance  
 
+#  Design Analysis – CMOS Differential Amplifier (Bias-Controlled PMOS Load)
+
+---
+
+
+##  Design Specifications
+
+| Parameter                  | Symbol     | Value            |
+|---------------------------|------------|------------------|
+| Technology                | —          | TSMC 180 nm      |
+| Supply Voltages           | VDD / VSS  | +0.9 V / −0.9 V  |
+| Power Budget              | P          | ≤ 1.8 mW         |
+| Channel Length            | L          | 480 nm           |
+| Input Common Mode         | Vin,CM     | 0 V              |
+| Output Common Mode        | Vo,CM      | 0 V              |
+| Tail Node Voltage         | Vp         | −0.7 V           |
+| Load Capacitance          | CL         | 10 pF            |
+| Threshold Voltage         | VT         | ≈ 0.36 V         |
+
+---
+
+## Power Budget & Tail Current
+
+Total supply span:
+
+VDD − VSS = 0.9 − (−0.9) = **1.8 V**
+
+Power relation:
+
+P = (VDD − VSS) · ISS  
+
+Constraint:
+
+1.8 · ISS ≤ 1.8 × 10⁻³  
+
+⇒ ISS ≤ **1 mA**
+
+✔ Selected:
+
+ISS = **1 mA**
+
+Power check:
+
+P = 1.8 × 1 mA = **1.8 mW** ✔
+
+---
+
+## Current Distribution
+
+At zero differential input:
+
+Vin1 = Vin2  
+
+Current splits evenly:
+
+ID1 = ID2 = ISS / 2 = **0.5 mA**
+
+---
+
+## Bias Conditions
+
+###  NMOS Pair (M1, M2)
+
+| Quantity | Expression | Value |
+|----------|------------|-------|
+| VG       | Vin,CM     | 0 V   |
+| VS       | Vp         | −0.7 V |
+
+
+
+VGS = VG − VS = 0 − (−0.7) = **0.7 V**
+
+VOV = VGS − VT = 0.7 − 0.36 = **0.34 V**
+
+VD = 0 V  
+
+VDS = VD − VS = 0 − (−0.7) = **0.7 V**
+
+✔ Saturation:
+
+0.7 > 0.34 → **Valid**
+
+---
+
+### Tail Current Source (M5)
+
+| Node | Value |
+|------|-------|
+| VS   | −0.9 V |
+| VD   | −0.7 V |
+
+VDS = 0.2 V  
+
+**Step 2: Choose:**
+
+VOV ≈ 0.2 V  
+
+VGS = VT + VOV = 0.36 + 0.2 = **0.56 V**
+
+VG = VS + VGS = −0.9 + 0.56 = **−0.34 V**
+
+✔ Edge saturation ensured:
+
+VDS ≈ VOV
+
+---
+### PMOS Active Load (M3, M4)
+
+| Node | Value |
+|------|-------|
+| VS   | 0.9 V |
+| VD   | 0 V   |
+| VG   | Vb2   |
+
+**Saturation condition:**
+
+VSD ≥ VSG − |VTp|
+
+Deriving:
+
+Vb2 ≥ **−0.39 V**
+
+✔ Selected:
+
+Vb2 ≈ **−0.36 V**
+
+---
+
+**Verification:**
+
+VSG = 0.9 − (−0.36) = **1.26 V**  
+
+VOV(p) = 1.26 − 0.39 = **0.87 V**
+
+Check:
+
+0.9 > 0.87 ✔ → Saturation confirmed
+
+---
+
+## Device Sizing
+
+### General Expression
+
+W = (2 ID L) / [μ Cox (VOV)²]
+
+---
+
+### NMOS Pair (M1, M2)
+
+Given:
+
+- ID = 0.5 mA  
+- μnCox = 2.365 × 10⁻⁴  
+- VOV = 0.34 V  
+
+**Calculation:**
+
+W = (2 × 0.5 × 10⁻³ × 480 × 10⁻⁹) / (2.365 × 10⁻⁴ × 0.1156)
+
+W ≈ **17.56 μm**
+
+✔ Final:
+
+W1 = W2 ≈ **17.6 μm**
+
+---
+
+### Tail Transistor (M5)
+
+Given:
+
+- ID = 1 mA  
+- VOV = 0.2 V  
+
+**Calculation:**
+
+W5 = (2 × 1 × 10⁻³ × 480 × 10⁻⁹) / (2.365 × 10⁻⁴ × 0.04)
+
+W5 ≈ **101.5 μm**
+
+---
+### PMOS Load (M3, M4)
+
+Given:
+
+- μpCox = 9.98 × 10⁻⁵  
+- ID = 0.5 mA  
+- VOV(p) = 0.87 V  
+
+**Calculation:**
+
+Wp = (2 × 0.5 × 10⁻³ × 480 × 10⁻⁹) / (9.98 × 10⁻⁵ × 0.7569)
+
+Wp ≈ **6.35 μm**
+
+✔ Final:
+
+W3 = W4 ≈ **6.35 μm**
+
+---
+
+## Post-Simulation Optimization
+
+| Device | Theoretical (μm) | Optimized (μm) |
+|--------|-----------------|----------------|
+| M1, M2 | 17.56           | 32             |
+| M5     | 101.5           | 209.15         |
+| M3, M4 | 6.35            | 13.88          |
+
+---
+
+## Insights
+
+- Analytical sizing gives **first-order estimates**
+- Simulation tuning compensates for:
+  - Short-channel effects  
+  - Mobility degradation  
+  - Bias shifts  
+- Increased widths → higher **gm → improved gain & stability**
+
+✔ Final design ensures:
+- All devices in saturation  
+- Accurate bias control  
+- High-gain differential operation
+
+DC Analysis – CMOS Differential Amplifier
+DC analysis is performed to verify the **biasing conditions** of the circuit and ensure that all transistors operate in the **saturation region**, which is essential for proper differential amplification.
+
+<img width="725" height="325" alt="image" src="https://github.com/user-attachments/assets/0ea55ba3-6201-4994-a3b3-3f60a677b1ea" />
 
 
 
