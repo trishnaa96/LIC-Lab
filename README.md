@@ -867,3 +867,717 @@ This matches the expected behavior of differential circuits, where the output is
 
 ### Summary
 The results indicate consistent gain, wide bandwidth, and stable phase response, demonstrating reliable high-frequency performance of the differential amplifier.
+
+
+
+## 2.1 Operation of Differential Amplifier with PMOS Active Load
+
+### Circuit Description
+This configuration uses:
+- Two matched NMOS transistors (M1, M2) forming the differential pair  
+- An NMOS transistor (M5) acting as a constant current source  
+- A PMOS current mirror (M3, M4) serving as the active load  
+
+---
+### Principle of Operation
+
+The amplifier processes the difference between the two input signals:
+
+vid = vin1 − vin2  
+
+Based on the input difference:
+- If vin1 > vin2 → M1 draws more current, M2 draws less  
+- If vin2 > vin1 → M2 draws more current, M1 draws less  
+
+The tail current (ISS), controlled by M5, is redistributed between M1 and M2 depending on this input difference.
+
+---
+### Role of Active Load
+
+- M3 is diode-connected and establishes a reference current  
+- M4 mirrors this current to the other branch  
+- This arrangement provides **high output resistance**, resulting in **higher gain** compared to resistive loads  
+
+---
+### Output Formation
+
+Variations in drain currents of M1 and M2 are converted into voltage changes at the output nodes (OUT1, OUT2), producing a differential output.
+
+---
+### Effect of Current Source (M5)
+
+- M5 operates in saturation to supply a constant tail current  
+- Its finite output resistance introduces slight source degeneration  
+- This effect slightly reduces gain but improves stability  
+
+---
+### Operating Regions
+**For small input signals:**
+- All transistors remain in saturation  
+- Current is shared smoothly  
+- Output is linear and proportional to input  
+
+**For large input signals:**
+- One transistor turns OFF  
+- The other carries most of the current  
+- Output becomes non-linear  
+
+---
+### Key Advantage
+
+The use of a PMOS current mirror as an active load significantly enhances the gain by increasing output resistance, making this configuration more efficient than a resistive load differential amplifier.
+
+# 2.2 Design Calculations – Differential Amplifier with PMOS Active Load
+
+<img width="460" height="325" alt="image" src="https://github.com/user-attachments/assets/5acc7e2e-0ecc-41b5-8012-af1684afd7f4" />
+
+
+---
+##  Given Specifications
+
+| Parameter                  | Symbol     | Value            |
+|---------------------------|------------|------------------|
+| Technology                | —          | TSMC 180 nm      |
+| Supply Voltage            | VDD        | +0.9 V           |
+| Negative Supply           | VSS        | −0.9 V           |
+| Power Constraint          | P          | ≤ 1.8 mW         |
+| Channel Length            | L          | 480 nm           |
+| Input CM Voltage          | Vin,CM     | 0 V              |
+| Output CM Voltage         | Vo,CM      | 0 V              |
+| Tail Node Voltage         | Vp         | −0.7 V           |
+| Load Capacitance          | CL         | 10 pF            |
+| Threshold Voltage         | VT         | ≈ 0.36 V         |
+
+---
+
+## Power Constraint
+
+Total supply voltage:
+VDD − VSS = 0.9 − (−0.9) = 1.8 V  
+
+Power relation:
+P = (VDD − VSS) × ISS  
+
+1.8 × ISS ≤ 1.8 × 10⁻³  
+
+ISS ≤ 1 mA  
+
+✔ Choose:
+ISS = 1 mA  
+
+Power check:
+P = 1.8 × 1 mA = 1.8 mW ✔  
+
+---
+
+##  Drain Current
+
+For balanced inputs:
+vin1 = vin2  
+
+ID1 = ID2 = ISS / 2  
+
+ID1 = ID2 = 1 mA / 2 = **0.5 mA**
+
+---
+
+## Bias Point Analysis
+
+### NMOS Pair (M1, M2)
+
+| Quantity | Expression        | Value |
+|----------|------------------|-------|
+| VG       | Given            | 0 V   |
+| VS       | = Vp             | −0.7 V|
+| VGS      | VG − VS          | 0.7 V |
+| VOV      | VGS − VT         | 0.34 V|
+| VD       | Given            | 0 V   |
+| VDS      | VD − VS          | 0.7 V |
+
+✔ Check:  
+0.7 > 0.34 → Saturation ✔  
+
+---
+### NMOS Current Source (M5)
+
+| Quantity | Value |
+|----------|-------|
+| VS       | −0.9 V |
+| VD       | −0.7 V |
+| VDS      | 0.2 V  |
+
+Condition:
+VDS ≥ VOV  
+
+Choose:
+VOV ≈ 0.2 V  
+
+Then:
+VGS = VT + VOV = 0.36 + 0.2 = 0.56 V  
+
+Gate voltage:
+VG = VS + VGS = −0.9 + 0.56 = **−0.34 V**
+
+✔ Check:
+0.2 ≥ 0.2 → Saturation edge ✔  
+
+---
+###  PMOS Load (M3, M4)
+
+| Quantity | Value |
+|----------|-------|
+| VS       | 0.9 V |
+| VD       | 0 V   |
+| VSD      | 0.9 V |
+
+✔ Since VSD ≫ VOV → Saturation ✔  
+
+---
+##  Width Calculation
+
+### Formula
+
+ID = (1/2) μnCox (W/L) (VOV)²  
+
+Rearranged:
+W = (2ID L) / [μnCox (VOV)²]  
+
+---
+###  M1, M2 Calculation
+
+Given:
+
+| Parameter | Value |
+|----------|-------|
+| ID       | 0.5 × 10⁻³ A |
+| L        | 480 × 10⁻⁹ m |
+| μnCox    | 2.365 × 10⁻⁴ |
+| VOV      | 0.34 V |
+
+Substitute:
+
+W = (2 × 0.5 × 10⁻³ × 480 × 10⁻⁹) / (2.365 × 10⁻⁴ × 0.34²)  
+
+W = (480 × 10⁻¹²) / (2.365 × 10⁻⁴ × 0.1156)  
+
+W = (480 × 10⁻¹²) / (2.733 × 10⁻⁵)  
+
+W ≈ **17.56 μm**
+
+---
+###  M5 Calculation
+
+Given:
+
+| Parameter | Value |
+|----------|-------|
+| ID       | 1 × 10⁻³ A |
+| VOV      | 0.2 V      |
+
+Substitute:
+
+W = (2 × 1 × 10⁻³ × 480 × 10⁻⁹) / (2.365 × 10⁻⁴ × 0.2²)  
+
+W = (960 × 10⁻¹²) / (2.365 × 10⁻⁴ × 0.04)  
+
+W = (960 × 10⁻¹²) / (9.46 × 10⁻⁶)  
+
+W ≈ **101.5 μm**
+
+---
+
+##  Width Optimization (Simulation)
+
+| Transistor | Calculated (μm) | Final (μm) |
+|------------|----------------|------------|
+| M1, M2     | 17.56          | 29.85      |
+| M5         | 101.5          | 195.85     |
+
+---
+## Observation
+
+- Theoretical calculations provide initial sizing  
+- Simulation tuning ensures:
+  - Accurate biasing (Vp ≈ −0.7 V)  
+  - Correct current levels  
+- Practical effects (mobility, λ variation) require width adjustment  
+
+✔ Final design satisfies both **power and bias conditions**
+
+## DC Analysis
+
+<img width="677" height="286" alt="image" src="https://github.com/user-attachments/assets/0e5dc9a1-5611-44e3-ae25-261c158b0f4e" />
+
+
+
+# Input & Output Range Analysis + Linearity Check
+
+
+##  Input Common-Mode Range (ICMR)
+
+The ICMR defines the allowable input voltage range for which all transistors remain in saturation.
+
+###  Lower Limit
+
+To keep NMOS transistors (M1, M2) ON:
+
+Condition:
+VGS ≥ VT  
+
+Using:
+VGS = VICM − VS  
+
+⇒ VICM(min) = VS + VT  
+
+Substituting:
+VS = −0.7 V,  VT = 0.36 V  
+
+VICM(min) = −0.7 + 0.36 = **−0.34 V**
+
+---
+
+###  Upper Limit
+
+To ensure PMOS load (M3, M4) stays in saturation:
+
+Condition:
+VSD ≥ VOVp  
+
+Using relations and simplifying:
+
+VICM(max) ≈ VD + |VTP|  
+
+Substituting:
+VD ≈ 0 V,  |VTP| ≈ 0.39 V  
+
+VICM(max) = **0.39 V**
+
+---
+###  Final ICMR
+
+| Range |
+|------|
+| **−0.34 V ≤ VICM ≤ 0.39 V** |
+
+---
+
+## Output Common-Mode Range (OCMR)
+
+Defines allowable output swing while maintaining saturation.
+
+###  Minimum Output Voltage
+
+Condition:
+VDS ≥ VOV  
+
+Vout(min) ≥ VS + VOV  
+
+Substituting:
+VS = −0.7 V, VOV = 0.34 V  
+
+Vout(min) = **−0.36 V**
+
+---
+### Maximum Output Voltage
+
+Condition:
+VSD ≥ VOVp  
+
+Vout(max) ≤ VDD − VOVp  
+
+Substituting:
+VDD = 0.9 V, VOVp ≈ 0.25 V  
+
+Vout(max) = **0.65 V**
+
+---
+
+### Final OCMR
+
+| Range |
+|------|
+| **−0.36 V ≤ Vout ≤ 0.65 V** |
+
+---
+## Differential Input Range (Linear Region)
+
+For proper linear amplification:
+
+- Both transistors must remain in saturation  
+- Tail current must be shared  
+
+### Maximum Differential Input
+
+vid(max) = 2VOV  
+
+Substituting:
+VOV = 0.25 V  
+
+vid(max) = **0.5 V**
+
+---
+
+###  Linear Operating Range
+
+| Range |
+|------|
+| **−0.5 V ≤ vid ≤ 0.5 V** |
+
+---
+##  Transient Analysis – Linearity Check
+
+Transient simulation is used to verify linear behavior.
+###  Linearity Condition
+
+|Vid| < 2VOV  
+
+Given:
+VOV = 0.24 V  
+
+√2VOV ≈ 1.414 × 0.24 ≈ **0.34 V**
+
+---
+
+### Insight
+
+- If |Vid| < 0.34 V → Linear operation  
+- If |Vid| exceeds this → Non-linear behavior begins  
+
+✔ Confirms practical limits of the amplifier’s linear region under dynamic conditions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Circuit 3: CMOS Differential Amplifier with Bias-Controlled PMOS Load
+
+<img width="185" height="247" alt="image" src="https://github.com/user-attachments/assets/494860a6-1fc0-4fe2-a897-4c738e1482d4" />
+
+## Working Principle
+
+This configuration employs a matched NMOS differential pair (M1, M2) whose common source node is biased by a constant tail current source (M5). The drains are connected to PMOS transistors (M3, M4), which act as active loads.
+
+Unlike a current mirror load, the gates of M3 and M4 are driven by a fixed bias voltage (Vb2). This ensures that the PMOS devices operate as controlled current sources, offering high output resistance without enforcing strict current mirroring.
+
+---
+## Operation Mechanism
+
+For a differential input:
+
+vid = vin1 − vin2  
+
+- When vin1 > vin2 → M1 draws a larger portion of ISS, reducing current through M2  
+- When vin2 > vin1 → M2 conducts more, while M1 current decreases  
+
+Thus, the constant tail current is dynamically steered between the two branches based on the input difference.
+
+---
+## Role of Bias-Controlled PMOS Load
+
+- PMOS transistors (M3, M4) convert current variations into voltage variations at the output  
+- Biasing via Vb2 ensures stable operation in saturation  
+- High output resistance enhances voltage gain significantly  
+
+---
+## Output Characteristics
+
+- Output is typically taken from one drain (single-ended output)  
+- Produces an amplified version of the differential input signal  
+
+---
+## Operating Regions
+
+**Small-Signal Operation:**
+- M1 and M2 remain in saturation  
+- Current is shared smoothly  
+- Output is linear and proportional to input  
+
+**Large-Signal Operation:**
+- One transistor approaches cutoff  
+- Other carries most of ISS  
+- Output exhibits non-linearity  
+
+---
+## Key Advantage
+
+This topology achieves **high gain and improved output swing** by combining a differential pair with bias-controlled PMOS active loads, offering better performance compared to resistive and current-mirror-based designs.
+
+
+
+
+
+
+# Design Calculations – CMOS Differential Amplifier (Bias-Controlled Load)
+
+<img width="448" height="329" alt="image" src="https://github.com/user-attachments/assets/eb55d01d-2765-4763-b10e-1928c09efb56" />
+
+##  Given Parameters
+
+| Parameter                  | Symbol     | Value            |
+|---------------------------|------------|------------------|
+| Technology                | —          | TSMC 180 nm      |
+| Supply Voltages           | VDD / VSS  | +0.9 V / −0.9 V  |
+| Power Limit               | P          | ≤ 1.8 mW         |
+| Channel Length            | L          | 480 nm           |
+| Input CM Voltage          | Vin,CM     | 0 V              |
+| Output CM Voltage         | Vo,CM      | 0 V              |
+| Tail Node Voltage         | Vp         | −0.7 V           |
+| Load Capacitance          | CL         | 10 pF            |
+| Threshold Voltage         | VT         | ≈ 0.36 V         |
+
+---
+##  Power Constraint
+
+Total supply voltage:
+
+VDD − VSS = 0.9 − (−0.9) = **1.8 V**
+
+Power equation:
+
+P = (VDD − VSS) × ISS  
+
+Substitute maximum allowed power:
+
+1.8 × ISS ≤ 1.8 × 10⁻³  
+
+Solve:
+
+ISS ≤ (1.8 × 10⁻³) / 1.8  
+ISS ≤ **1 × 10⁻³ A = 1 mA**
+
+✔ Choose:
+ISS = **1 mA**
+
+Verification:
+
+P = 1.8 × 1 × 10⁻³ = **1.8 mW** ✔
+
+---
+## Drain Current Calculation
+
+At zero differential input:
+
+Vin1 = Vin2  
+
+Tail current splits equally:
+
+ID1 = ID2 = ISS / 2  
+
+Substitute:
+
+ID1 = ID2 = (1 × 10⁻³) / 2  
+ID1 = ID2 = **0.5 × 10⁻³ A = 0.5 mA**
+
+---
+
+## Bias Point Calculations
+
+###  NMOS Differential Pair (M1, M2)
+
+Gate voltage:
+
+VG = Vin,CM = **0 V**
+
+Source voltage:
+
+VS = Vp = **−0.7 V**
+
+####  Gate-Source Voltage
+
+VGS = VG − VS  
+VGS = 0 − (−0.7)  
+VGS = **0.7 V**
+
+####  Overdrive Voltage
+
+VOV = VGS − VT  
+VOV = 0.7 − 0.36  
+VOV = **0.34 V**
+
+#### Drain Voltage
+
+Given:
+
+VD = Vo,CM = **0 V**
+
+####  Drain-Source Voltage
+
+VDS = VD − VS  
+VDS = 0 − (−0.7)  
+VDS = **0.7 V**
+
+---
+
+#### Step 5: Saturation Check
+
+Condition:
+
+VDS > VOV  
+
+0.7 > 0.34 ✔  
+
+→ M1 and M2 operate in **saturation**
+
+---
+
+### NMOS Current Source (M5)
+
+Source:
+
+VS = VSS = **−0.9 V**
+
+Drain:
+
+VD = Vp = **−0.7 V**
+
+#### Drain-Source Voltage
+
+VDS = VD − VS  
+VDS = −0.7 − (−0.9)  
+VDS = **0.2 V**
+
+#### Choose Overdrive
+
+To keep M5 in saturation:
+
+VDS ≥ VOV  
+
+Choose:
+
+VOV ≈ **0.2 V**
+
+####  Gate-Source Voltage
+VGS = VT + VOV  
+VGS = 0.36 + 0.2  
+VGS = **0.56 V**
+
+---
+#### Gate Voltage
+
+VG = VS + VGS  
+VG = −0.9 + 0.56  
+VG = **−0.34 V**
+
+---
+#### Saturation Check
+
+0.2 ≥ 0.2 ✔  
+
+→ M5 operates at **edge of saturation**
+
+###  PMOS Load (M3, M4)
+
+Source:
+
+VS = VDD = **0.9 V**
+
+Drain:
+
+VD = **0 V**
+
+---
+####  Source-Drain Voltage
+
+VSD = VS − VD  
+VSD = 0.9 − 0  
+VSD = **0.9 V**
+
+#### Saturation Check
+
+Condition:
+
+VSD > VOV  
+
+0.9 ≫ 0.25 ✔  
+
+→ PMOS devices are in **deep saturation**
+
+## Width Calculations
+
+###  Formula
+
+ID = (1/2) μnCox (W/L) (VOV)²  
+
+Rearranged:
+
+W = (2ID L) / [μnCox (VOV)²]
+
+---
+###  NMOS Differential Pair (M1, M2)
+
+Substitute values:
+
+W = (2 × 0.5 × 10⁻³ × 480 × 10⁻⁹) / (2.365 × 10⁻⁴ × (0.34)²)
+
+Numerator:
+
+= 2 × 0.5 × 10⁻³ × 480 × 10⁻⁹  
+= 480 × 10⁻¹²  
+
+Denominator:
+
+(0.34)² = 0.1156  
+
+= 2.365 × 10⁻⁴ × 0.1156  
+= 2.733 × 10⁻⁵  
+#### Final:
+
+W = (480 × 10⁻¹²) / (2.733 × 10⁻⁵)  
+W ≈ **17.56 μm**
+
+###  NMOS Current Source (M5)
+
+Substitute:
+
+W = (2 × 1 × 10⁻³ × 480 × 10⁻⁹) / (2.365 × 10⁻⁴ × (0.2)²)
+
+---
+
+Numerator:
+
+= 960 × 10⁻¹²  
+
+Denominator:
+
+(0.2)² = 0.04  
+
+= 2.365 × 10⁻⁴ × 0.04  
+= 9.46 × 10⁻⁶  
+
+#### Final:
+
+W = (960 × 10⁻¹²) / (9.46 × 10⁻⁶)  
+W ≈ **101.5 μm**
+
+## Width Refinement (Simulation)
+
+| Transistor | Calculated (μm) | Final (μm) |
+|------------|----------------|------------|
+| M1, M2     | 17.56          | 29.85      |
+| M5         | 101.5          | 195.85     |
+
+---
+## Insight
+
+- Step-by-step calculations establish correct operating region  
+- Practical simulation accounts for non-idealities  
+- Increased width → higher gm → improved gain  
+
+✔ Final design achieves:
+- Accurate biasing  
+- Stable current operation  
+- Desired amplifier performance  
+
+
+
+
+
