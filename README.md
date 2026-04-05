@@ -1245,16 +1245,200 @@ VOV = 0.24 V
 
 ✔ Confirms practical limits of the amplifier’s linear region under dynamic conditions
 
+ ## LINEAR REGION OPERATION
+<img width="674" height="142" alt="image" src="https://github.com/user-attachments/assets/a072603b-a9a0-40aa-9a01-06c9e592e4b9" />
+
+INTERPRETATION:
+✔ Output is clean and sinusoidal and that both the branches conduct equally and the amplifier behaves linearly.
+
+## NON LINEAR REGION OPERATION
+<img width="676" height="139" alt="image" src="https://github.com/user-attachments/assets/0e178754-6b35-42bd-87ff-d17c125bae76" />
 
 
 
+**Input:**  
+Vid = 400 mV  
+
+**Check:**  
+400 mV > 340 mV (VOV) →  Exceeds linear limit  
+
+**Effect:**  
+- One transistor OFF, other dominates current  
+- Loss of symmetry and linear gain  
+
+**Conclusion:**  
+Circuit operates in **non-linear region** with distorted output.
+
+## Interpretation of Operation
+
+For low differential input levels, both NMOS devices remain active and divide the tail current nearly equally, producing a well-balanced and linear output response.
+As the input difference grows, this balance is disturbed. Current gradually shifts toward one branch while the other weakens toward cutoff, introducing noticeable non-linearity and distortion in the output.
+
+## 📊 Gain Analysis: Practical vs Ideal Behavior
+
+### 🔹 Results from Transient Simulation
+
+| Parameter     | Observed Value |
+|---------------|---------------|
+| Input (p-p)   | 100 mV        |
+| Output (p-p)  | ≈ 180 mV      |
+
+**Voltage Gain:**
+
+Av = Vout / Vin = 180 / 100 = **1.8 V/V**
+
+**Gain in dB:**
+
+Av(dB) = 20 log(1.8) ≈ **5.1 dB**
+
+---
+
+### 🔹 Analytical (Ideal) Estimation
+
+#### Output Resistance
+
+ro = 1 / (λ · Id)
+
+| Parameter | Value     |
+|----------|----------|
+| λ        | 0.1 V⁻¹  |
+| Id       | 0.5 mA   |
+
+ro ≈ **20 kΩ**
+
+Effective load:
+
+Rout ≈ ro || ro ≈ **10 kΩ**
+
+---
+
+#### Transconductance
+
+gm = 2Id / Vov
+
+| Parameter | Value     |
+|----------|----------|
+| Id       | 0.5 mA   |
+| Vov      | ≈ 0.25 V |
+
+gm ≈ **4 mS**
+
+---
+
+#### Expected Gain
+
+Av = gm × Rout  
+
+Av ≈ 4 mS × 10 kΩ = **40 V/V**
+
+Av(dB) ≈ **32 dB**
+
+---
+
+## Practical Behavior & Deviation Analysis
+
+The large gap between theoretical (~40) and simulated (~1.8) gain arises due to real-device effects that are ignored in first-order calculations.
+
+---
+### 1. Channel Length Modulation (λ Variation)
+
+- In theory, λ is assumed constant  
+- In practice, λ varies with VDS and device geometry  
+- This reduces output resistance (ro ↓)  
+- Lower ro → lower Rout → reduced gain  
+
+---
+### 2. Non-Ideal Tail Current Source
+
+- Ideal assumption: constant current source  
+- Real NMOS (M5) has finite output resistance  
+- Current varies with voltage → imperfect current steering  
+- This reduces differential gain and symmetry  
+
+---
+
+### 3. Limited Output Resistance
+
+- Theoretical model simplifies Rout = ro || ro  
+- In reality, multiple devices contribute to output impedance  
+- Interaction between NMOS pair + PMOS load + current source lowers effective Rout  
+
+---
+### 4. Mobility Degradation
+
+- Carrier mobility decreases at high electric fields  
+- This reduces effective transconductance (gm ↓)  
+- Lower gm directly reduces gain  
+
+---
+### 5. Parasitic Capacitances
+
+- Internal capacitances: Cgs, Cgd, Cdb  
+- External load: CL = 10 pF  
+- These introduce frequency-dependent effects  
+- Signal attenuation occurs even at moderate frequencies  
+
+---
+### 6. Bias Point Variations
+
+- Small shifts in node voltages affect VOV  
+- Since gm ∝ 1/VOV, even slight changes impact gain  
+- Leads to mismatch between ideal and simulated results  
+
+---
+## Final Insight
+
+- Analytical gain represents an **upper bound**
+- Simulation reflects **realistic device behavior**
+- Performance is governed by trade-offs between:
+  - Gain  
+  - Linearity  
+  - Stability  
+
+✔ The observed result highlights the importance of **simulation-based refinement** in analog design.
 
 
+##  AC Analysis – Frequency Response
+
+### 🔹 Excitation Setup
+
+| Parameter        | Value              |
+|------------------|--------------------|
+| Vin1             | +0.5 AC            |
+| Vin2             | −0.5 AC            |
+| Sweep Range      | 1 Hz → 1 GHz       |
+
+**Measured Output:**
+
+Vout = V(out1) − V(out2)
+
+---
+
+<img width="925" height="188" alt="image" src="https://github.com/user-attachments/assets/11975378-74d6-4216-8a09-0125f0a27742" />
 
 
+### Key Results
 
+- Midband Gain ≈ **5.4 dB**  
+- Bandwidth extends up to **hundreds of MHz**  
+- Gain reduces progressively at higher frequencies  
 
+---
 
+### Response Characteristics
+
+- Flat gain region observed at low–mid frequencies  
+- High-frequency attenuation due to parasitic effects  
+- Overall response resembles a **low-pass filter**
+
+---
+
+### Interpretation
+
+- Circuit exhibits stable **differential amplification**  
+- Biasing ensures proper small-signal operation  
+- Gain remains linear within operating range  
+- Reduced gain compared to theory confirms **real-world non-idealities**
 
 
 
